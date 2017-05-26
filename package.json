@@ -1,0 +1,25 @@
+{
+  "name": "mandarin-score",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kkamali/mandarin-score.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kkamali/mandarin-score/issues"
+  },
+  "homepage": "https://github.com/kkamali/mandarin-score#readme",
+  "dependencies": {
+    "dotenv-extended": "^2.0.0",
+    "restify": "^4.3.0",
+    "watson-developer-cloud": "^2.32.0"
+  }
+}
