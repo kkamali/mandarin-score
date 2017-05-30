@@ -23,6 +23,20 @@ fs.readdirSync('./audio-files').forEach(file => {
 recognizeSpeech(files);
 
 function recognizeSpeech(files) {
+
+    var lineReader = require('readline').createInterface({
+      input: require('fs').createReadStream('golden_sentences.txt')
+    });
+
+    var golden_sentences = [];
+
+    lineReader.on('line', function (line) {
+        golden_sentences.push(line);
+    });
+
+    var indices = [];
+    var golden_index = 0;
+
     for (var file of files) {
         var params = {
             audio: fs.createReadStream("./audio-files/" + file),
@@ -32,11 +46,16 @@ function recognizeSpeech(files) {
             word_alternatives_threshold: 0.9,
         };
 
+        indices.push(parseInt(file.replace(".flac", "")) - 1);
+
         speech_to_text.recognize(params, function(error, transcript) {
-             if (error)
-               console.log('Error:', error);
-             else
-               console.log(transcript.results[0].alternatives[0].transcript);
+            if (error)
+                console.log('Error:', error);
+            else
+                var transcribed = transcript.results[0].alternatives[0].transcript;
+                console.log("speech to text transcribed: " + transcribed.replace(/ /g,''));
+                console.log("golden sentence: " + golden_sentences[indices[golden_index]]);
+                golden_index = golden_index + 1;
         });
     }
 }
