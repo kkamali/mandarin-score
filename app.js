@@ -12,50 +12,45 @@ var speech_to_text = new SpeechToTextV1 ({
 
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 8000, function () {
-    console.log('%s listening to %s', server.name, server.url);
+    console.log("Please direct me to an audio file!");
 });
 
-var files = [];
-fs.readdirSync('./audio-files').forEach(file => {
-    files.push(file);
-});
+var stdin = process.openStdin();
 
-recognizeSpeech(files);
-
-function recognizeSpeech(files) {
-
-    var lineReader = require('readline').createInterface({
-      input: require('fs').createReadStream('golden_sentences.txt')
+stdin.addListener("data", function(d) {
+    recognizeSpeech(d.toString().trim(), function(transcript) {
+        console.log(transcript);
     });
+});
+
+function recognizeSpeech(file, callback) {
 
     var golden_sentences = [];
+
+    var lineReader = require('readline').createInterface({
+        input: fs.createReadStream('golden_sentences.txt')
+    });
 
     lineReader.on('line', function (line) {
         golden_sentences.push(line);
     });
 
-    var indices = [];
-    var golden_index = 0;
+    var params = {
+        audio: fs.createReadStream("./audio-files/" + file),
+        content_type: 'audio/flac',
+        model: 'zh-CN_BroadbandModel',
+        timestamps: true,
+        word_alternatives_threshold: 0.9,
+    };
 
-    for (var file of files) {
-        var params = {
-            audio: fs.createReadStream("./audio-files/" + file),
-            content_type: 'audio/flac',
-            model: 'zh-CN_BroadbandModel',
-            timestamps: true,
-            word_alternatives_threshold: 0.9,
-        };
-
-        indices.push(parseInt(file.replace(".flac", "")) - 1);
-
-        speech_to_text.recognize(params, function(error, transcript) {
-            if (error)
-                console.log('Error:', error);
-            else
-                var transcribed = transcript.results[0].alternatives[0].transcript;
-                console.log("speech to text transcribed: " + transcribed.replace(/ /g,''));
-                console.log("golden sentence: " + golden_sentences[indices[golden_index]]);
-                golden_index = golden_index + 1;
+    speech_to_text.recognize(params, function(error, transcript) {
+        if (error)
+            console.log('Error:', error);
+        else
+            var transcribed = transcript.results[0].alternatives[0].transcript;
+            var final_transcription = transcribed.replace(/ /g,'');
+            console.log("speech to text : " + final_transcription);
+            console.log("golden sentence: " + golden_sentences[parseInt(file.replace(".flac", "")) - 1]);
+            console.log("You can give me another audio file name!"); 
         });
-    }
 }
